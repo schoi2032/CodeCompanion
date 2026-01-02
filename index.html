@@ -17,7 +17,110 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: row;
+            /* Change to row for sidebar layout */
+            overflow: hidden;
+            /* Prevent body scroll */
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: rgba(15, 23, 42, 0.9);
+            border-right: 1px solid rgba(59, 130, 246, 0.2);
+            display: flex;
             flex-direction: column;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+        }
+
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .conversation-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #cbd5e1;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .conversation-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: white;
+        }
+
+        .conversation-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .conversation-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+
+        .conversation-actions {
+            display: none;
+            gap: 0.25rem;
+        }
+
+        .conversation-item:hover .conversation-actions {
+            display: flex;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .action-btn:hover {
+            color: white;
+        }
+
+        /* Main Content Wrapper */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: 100vh;
         }
 
         .header {
@@ -344,88 +447,135 @@
         }
 
         code {
-            color: #a5f3fc;
-            font-family: 'Courier New', monospace;
-        }
+            .new-chat-btn span {
+                font-size: 1.25rem;
+                line-height: 1;
+            }
+
+            .conversation-list {
+                flex: 1;
+                overflow-y: auto;
+                padding-right: 0.5rem;
+                /* For scrollbar */
+            }
+
+            .conversation-list::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .conversation-list::-webkit-scrollbar-track {
+                background: rgba(30, 41, 59, 0.5);
+                border-radius: 10px;
+            }
+
+            .conversation-list::-webkit-scrollbar-thumb {
+                background: rgba(59, 130, 246, 0.5);
+                border-radius: 10px;
+            }
+
+            .conversation-list::-webkit-scrollbar-thumb:hover {
+                background: rgba(59, 130, 246, 0.7);
+            }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div class="header-left">
-                <div class="logo">
-                    <span class="logo-text">S</span>
-                </div>
-                <div class="header-text">
-                    <h1>Shat GPT</h1>
-                    <p>Professional AI Coding Assistant</p>
-                </div>
-            </div>
-            <button class="clear-btn" id="clearBtn" style="display: none;">Clear Chat</button>
+    <div class="sidebar">
+        <button class="new-chat-btn" onclick="startNewChat()">
+            <span>+</span> New Chat
+        </button>
+        <div class="conversation-list" id="conversationList">
+            <!-- Conversations will be loaded here -->
         </div>
     </div>
 
-    <div class="container">
-        <div class="messages" id="messages">
-            <div class="welcome" id="welcome">
-                <div class="welcome-icon">
-                    <div class="welcome-logo">
-                        <span class="welcome-logo-text">S</span>
+    <div class="main-content">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo">
+                        <span class="logo-text">S</span>
+                    </div>
+                    <div class="header-text">
+                        <h1>Shat GPT</h1>
+                        <p>Professional AI Coding Assistant</p>
                     </div>
                 </div>
-                <h2>Welcome to Shat GPT</h2>
-                <p>Enterprise-grade AI assistance for your coding needs</p>
-                <div class="suggestions">
-                    <div class="suggestion" onclick="setSuggestion('How do I create a React component?')">
-                        <div class="suggestion-title">React Components</div>
-                        <div class="suggestion-desc">Learn how to create components</div>
+                <button class="clear-btn" id="clearBtn" style="display: none;">Clear Chat</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="messages" id="messages">
+                <div class="welcome" id="welcome">
+                    <div class="welcome-icon">
+                        <div class="welcome-logo">
+                            <span class="welcome-logo-text">S</span>
+                        </div>
                     </div>
-                    <div class="suggestion" onclick="setSuggestion('Explain async/await in JavaScript')">
-                        <div class="suggestion-title">Async Programming</div>
-                        <div class="suggestion-desc">Understanding async/await</div>
-                    </div>
-                    <div class="suggestion" onclick="setSuggestion('How do I debug a null pointer error?')">
-                        <div class="suggestion-title">Debugging Help</div>
-                        <div class="suggestion-desc">Fix common errors</div>
-                    </div>
-                    <div class="suggestion" onclick="setSuggestion('Show me a Python function example')">
-                        <div class="suggestion-title">Code Examples</div>
-                        <div class="suggestion-desc">Get sample code snippets</div>
+                    <h2>Welcome to Shat GPT</h2>
+                    <p>Enterprise-grade AI assistance for your coding needs</p>
+                    <div class="suggestions">
+                        <div class="suggestion" onclick="setSuggestion('How do I create a React component?')">
+                            <div class="suggestion-title">React Components</div>
+                            <div class="suggestion-desc">Learn how to create components</div>
+                        </div>
+                        <div class="suggestion" onclick="setSuggestion('Explain async/await in JavaScript')">
+                            <div class="suggestion-title">Async Programming</div>
+                            <div class="suggestion-desc">Understanding async/await</div>
+                        </div>
+                        <div class="suggestion" onclick="setSuggestion('How do I debug a null pointer error?')">
+                            <div class="suggestion-title">Debugging Help</div>
+                            <div class="suggestion-desc">Fix common errors</div>
+                        </div>
+                        <div class="suggestion" onclick="setSuggestion('Show me a Python function example')">
+                            <div class="suggestion-title">Code Examples</div>
+                            <div class="suggestion-desc">Get sample code snippets</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="input-area">
-        <div class="input-container">
-            <textarea id="userInput" rows="2"
-                placeholder="Ask a coding question... (Press Enter to send, Shift+Enter for new line)"></textarea>
-            <button id="sendBtn">Send</button>
+        <div class="input-area">
+            <div class="input-container">
+                <textarea id="userInput" rows="2"
+                    placeholder="Ask a coding question... (Press Enter to send, Shift+Enter for new line)"></textarea>
+                <button id="sendBtn">Send</button>
+            </div>
         </div>
-    </div>
+    </div> <!-- End main-content -->
 
     <script>
-        let conversationHistory = [];
+        let currentConversationId = null;
         let isLoading = false;
 
+        const conversationListDiv = document.getElementById('conversationList');
         const messagesDiv = document.getElementById('messages');
         const welcomeDiv = document.getElementById('welcome');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const clearBtn = document.getElementById('clearBtn');
 
-        function setSuggestion(text) {
-            userInput.value = text;
-            userInput.focus();
+        // --- UI Rendering ---
+
+        function showWelcome() {
+            welcomeDiv.style.display = 'block';
+            clearBtn.style.display = 'none';
+            messagesDiv.innerHTML = '';
+            messagesDiv.appendChild(welcomeDiv);
+        }
+
+        function hideWelcome() {
+            welcomeDiv.style.display = 'none';
+            clearBtn.style.display = 'block';
+            if (messagesDiv.contains(welcomeDiv)) {
+                welcomeDiv.remove();
+            }
         }
 
         function addMessage(role, content) {
-            if (welcomeDiv.style.display !== 'none') {
-                welcomeDiv.style.display = 'none';
-                clearBtn.style.display = 'block';
-            }
+            hideWelcome();
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
@@ -459,8 +609,108 @@
 
         function hideLoading() {
             const loadingDiv = document.getElementById('loading');
-            if (loadingDiv) {
-                loadingDiv.remove();
+            if (loadingDiv) loadingDiv.remove();
+        }
+
+        // --- API & State Management ---
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('http://localhost:3000/api/conversations');
+                const conversations = await res.json();
+                renderConversationList(conversations);
+            } catch (err) {
+                console.error('Failed to load conversations:', err);
+            }
+        }
+
+        function renderConversationList(conversations) {
+            conversationListDiv.innerHTML = '';
+            conversations.forEach(conv => {
+                const div = document.createElement('div');
+                div.className = `conversation-item ${conv.id === currentConversationId ? 'active' : ''}`;
+                div.onclick = (e) => {
+                    // Prevent triggering if clicked on action buttons
+                    if (e.target.closest('.action-btn')) return;
+                    loadConversation(conv.id);
+                };
+
+                div.innerHTML = `
+                    <div class="conversation-title">${conv.title}</div>
+                    <div class="conversation-actions">
+                        <button class="action-btn" onclick="renameConversation('${conv.id}', '${conv.title}')" title="Rename">✎</button>
+                        <button class="action-btn" onclick="deleteConversation('${conv.id}')" title="Delete">🗑️</button>
+                    </div>
+                `;
+                conversationListDiv.appendChild(div);
+            });
+        }
+
+        async function startNewChat() {
+            try {
+                // Determine if we should really create a new chat on server or just reset UI
+                // For simplicity, let's create one on server immediately to get an ID? 
+                // Alternatively, reset UI and create on first message. 
+                // Let's create immediately to verify persistence logic works easily.
+                const res = await fetch('http://localhost:3000/api/conversations', { method: 'POST' });
+                const newConv = await res.json();
+                loadConversation(newConv.id);
+                loadConversations(); // refresh list
+            } catch (err) {
+                console.error('Error creating chat:', err);
+            }
+        }
+
+        async function loadConversation(id) {
+            try {
+                currentConversationId = id;
+                const res = await fetch(`http://localhost:3000/api/conversations/${id}`);
+                const conv = await res.json();
+
+                // Clear UI
+                messagesDiv.innerHTML = '';
+
+                if (conv.messages.length === 0) {
+                    showWelcome();
+                } else {
+                    hideWelcome();
+                    conv.messages.forEach(msg => addMessage(msg.role, msg.content));
+                }
+
+                // Update styling in sidebar
+                loadConversations();
+            } catch (err) {
+                console.error('Error loading chat:', err);
+            }
+        }
+
+        async function deleteConversation(id) {
+            if (!confirm('Delete this conversation?')) return;
+            try {
+                await fetch(`http://localhost:3000/api/conversations/${id}`, { method: 'DELETE' });
+                if (currentConversationId === id) {
+                    currentConversationId = null;
+                    showWelcome();
+                }
+                loadConversations();
+            } catch (err) {
+                console.error('Error deleting chat:', err);
+            }
+        }
+
+        async function renameConversation(id, oldTitle) {
+            const newTitle = prompt('Rename conversation:', oldTitle);
+            if (!newTitle || newTitle === oldTitle) return;
+
+            try {
+                await fetch(`http://localhost:3000/api/conversations/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle })
+                });
+                loadConversations();
+            } catch (err) {
+                console.error('Error renaming:', err);
             }
         }
 
@@ -468,50 +718,46 @@
             const message = userInput.value.trim();
             if (!message || isLoading) return;
 
-            addMessage('user', message);
-            conversationHistory.push({ role: 'user', content: message });
+            // If no chat selected, create one
+            if (!currentConversationId) {
+                try {
+                    const res = await fetch('http://localhost:3000/api/conversations', { method: 'POST' });
+                    const newConv = await res.json();
+                    currentConversationId = newConv.id;
+                    loadConversations(); // Refresh list to show new chat
+                } catch (err) {
+                    console.error('Failed to create init chat:', err);
+                    return;
+                }
+            }
 
+            // Optimistic UI update
+            addMessage('user', message);
             userInput.value = '';
             isLoading = true;
             sendBtn.disabled = true;
             showLoading();
 
-            // TODO: Replace with your actual API key
-            const API_KEY = 'YOUR_API_KEY_HERE';
-
             try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                const res = await fetch(`http://localhost:3000/api/conversations/${currentConversationId}/message`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': API_KEY,
-                        'anthropic-version': '2023-06-01',
-                        'dangerously-allow-browser': 'true' // Required for client-side calls
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-3-5-sonnet-20240620',
-                        max_tokens: 1000,
-                        messages: conversationHistory,
-                        system: 'You are an expert coding assistant. Help users with coding questions, debugging, explanations, and best practices. Provide clear, concise code examples when appropriate. Get straight to answering their questions without introducing yourself. Be direct and helpful.'
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
                 });
 
-                const data = await response.json();
+                const data = await res.json();
                 hideLoading();
 
-                if (response.ok && data.content && data.content[0]) {
-                    const assistantMessage = data.content[0].text;
-                    addMessage('assistant', assistantMessage);
-                    conversationHistory.push({ role: 'assistant', content: assistantMessage });
+                if (res.ok) {
+                    addMessage('assistant', data.content);
+                    // Refresh list in case title changed (auto-summary)
+                    loadConversations();
                 } else {
-                    const errorMessage = data.error ? data.error.message : 'Unknown error';
-                    addMessage('assistant', `Error: ${errorMessage}`);
-                    console.error('API Error:', data);
+                    addMessage('assistant', `Error: ${data.error || 'Unknown error'}`);
                 }
-            } catch (error) {
+            } catch (err) {
                 hideLoading();
-                addMessage('assistant', `Network Error: ${error.message}`);
-                console.error('Network Error:', error);
+                addMessage('assistant', `Network Error: ${err.message}`);
             } finally {
                 isLoading = false;
                 sendBtn.disabled = false;
@@ -519,20 +765,13 @@
             }
         }
 
-        function clearChat() {
-            conversationHistory = [];
-            messagesDiv.innerHTML = '';
-            const welcomeClone = document.createElement('div');
-            welcomeClone.className = 'welcome';
-            welcomeClone.id = 'welcome';
-            welcomeClone.innerHTML = welcomeDiv.innerHTML;
-            messagesDiv.appendChild(welcomeClone);
-            clearBtn.style.display = 'none';
+        function setSuggestion(text) {
+            userInput.value = text;
+            userInput.focus();
         }
 
+        // Init
         sendBtn.addEventListener('click', sendMessage);
-        clearBtn.addEventListener('click', clearChat);
-
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -540,7 +779,7 @@
             }
         });
 
-        userInput.focus();
+        loadConversations();
     </script>
 </body>
 
